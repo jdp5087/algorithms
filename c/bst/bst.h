@@ -2,8 +2,12 @@ struct _tree;
 struct _node;
 
 #ifndef SCREEN_WIDTH
-#define SCREEN_WIDTH 80
+#define SCREEN_WIDTH 98
 #endif /* SCREEN_WIDTH */
+
+#ifndef PRINT_DIGITS
+#define PRINT_DIGITS 2
+#endif /* PRINT_DIGITS */
 
 #ifndef NIL
 #define NIL 1
@@ -35,5 +39,5 @@ typedef struct _tree {
 
 tree * init_tree(void);
 node * init_null(void);
-node * init_node(void *, long (*getkey)(void *));
+node * init_node(tree *, void *, long (*getkey)(void *));
 
