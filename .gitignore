@@ -1,6 +1,8 @@
-*
+*~
+/c/bst/*
 !.gitignore
-!*.h
-!*.c
-!makefile
-!*.txt
+!/c/bst/*.c
+!/c/bst/*.h
+!/c/bst/makefile
+
+
