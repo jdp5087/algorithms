@@ -219,10 +219,74 @@ print_tree(tree *T)
     }
     printf("\n\n\n");
   }
-  
 }
-// 
-// {50, 25, 75, 99, 1, 40, 60, 55, 57};
+
+void
+transplant(tree *T, node *u, node *v)
+{
+  if (is_nil(u->p))
+    T->root = v;
+  else if (u = u->p->left)
+    u->p->left = v;
+  else
+    u->p->right = v;
+  if (!is_nil(v))
+    v->p = u->p;
+}
+
+node *
+tree_minimum(node *x)
+{
+  while (!is_nil(x->left)) {
+    x = x->left;
+  }
+  return x;
+}
+
+node *
+tree_maximum(node *x)
+{
+  while (!is_nil(x->right)) {
+    x = x->right;
+  }
+  return x;
+}
+
+void
+tree_delete(tree *T, node *z)
+{
+  if (is_nil(z->left)) {
+    transplant(T, z, z->right);
+  }
+  else if (is_nil(z->right)) {
+    transplant(T, z, z->left);
+  }
+  else {
+    node *y = tree_minimum(z->right);
+    if (y->p != z) {
+      transplant(T, y, y->right);
+      y->right = z->right;
+      y->right->p = y;
+    }
+    transplant(T, z, y);
+    y->left = z->left;
+    y->left->p = y;
+  }
+}
+
+node *
+tree_search(node *x, long k)
+{
+  while ((!is_nil(x)) || (k != x->key)) {
+      if (k < x->key)
+	x = x->left;
+      else
+	x = x->right;
+    }
+    return x;
+}
+
+  
 
 int
 main()
@@ -230,6 +294,8 @@ main()
   const long arr[] = {0, 1, 2, 3, 4, 5 ,6};
   size_t len = (sizeof(arr)/sizeof(long));
   tree *T = construct_tree(arr, len, intgetkey);
+  node *x = tree_search(T->root, 6);
+  printf("%ld", x->key);
   print_tree(T);
   dealloc_tree(T);
   return 0;
