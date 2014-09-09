@@ -277,7 +277,7 @@ tree_delete(tree *T, node *z)
 node *
 tree_search(node *x, long k)
 {
-  while ((!is_nil(x)) || (k != x->key)) {
+  while ((!is_nil(x)) && (k != x->key)) {
       if (k < x->key)
 	x = x->left;
       else
