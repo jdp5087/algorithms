@@ -4,6 +4,7 @@
 #include "bst.h"
 
 
+
 int
 is_nil(node *n)
 {
@@ -43,6 +44,9 @@ node *
 init_null(void)
 {
   node *n = (node*)malloc(sizeof(node));
+#ifdef RED_BLACK_TREE
+  n->color = BLACK;
+#endif /* set color to black on T.nil */
   n->nil = 1;
   return n;
 }
@@ -154,7 +158,7 @@ void print_node_rec(node *n)
 }
 
 int
-two_pow(x)
+two_pow(int x)
 {
   return (1 << x);
 }
@@ -163,7 +167,6 @@ void
 add_node_to_array(node *x, int i, int n, long *nodes)
 {
   if (i >= n) {
-    printf("i must not be greater than n - ADD_NODE_TO_ARRAY\n");
     return;
   }
   if (is_nil(x))
@@ -252,6 +255,32 @@ tree_maximum(node *x)
   return x;
 }
 
+node *
+tree_successor(node *x)
+{
+  if (!is_nil(x->right))
+    return tree_minimum(x->right);
+  node *y = x->p;
+  while (!is_nil(y) && (y->right == x)) {
+    x = y;
+    y = y->p;
+  }
+  return y;
+}
+
+node *
+tree_predecessor(node *x)
+{
+  if (!is_nil(x->left))
+    return tree_maximum(x->left);
+  node *y = x->p;
+  while (!is_nil(y) && (y->left == x)) {
+    x = y;
+    y = y->p;
+  }
+  return y;
+}
+
 void
 tree_delete(tree *T, node *z)
 {
@@ -270,6 +299,7 @@ tree_delete(tree *T, node *z)
     }
     transplant(T, z, y);
     y->left = z->left;
+
     y->left->p = y;
   }
 }
@@ -286,16 +316,19 @@ tree_search(node *x, long k)
     return x;
 }
 
-  
-
+// 
+// {0, 1, 2, 3, 4, 5 ,6};
 int
 main()
 {
-  const long arr[] = {0, 1, 2, 3, 4, 5 ,6};
+  const long arr[] = {50, 25, 75, 1, 40, 60, 90}; 
   size_t len = (sizeof(arr)/sizeof(long));
   tree *T = construct_tree(arr, len, intgetkey);
-  node *x = tree_search(T->root, 6);
-  printf("%ld", x->key);
+  node *x = tree_maximum(T->root);
+  while (!is_nil(x)) {
+    printf("%ld\n", x->key);
+    x = tree_predecessor(x);
+  }
   print_tree(T);
   dealloc_tree(T);
   return 0;
