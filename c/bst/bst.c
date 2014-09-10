@@ -319,14 +319,22 @@ tree_search(node *x, long k)
 }
 
 
-// rewrite without transplant and do checks for T.nil in y and if x.p == t.nil
 void
-rotate_left(tree *T, node *x) {
-  node *y = x->left;
-  transplant(T, x->left, y-right);
-  transplant(T, y->right, x);
-  y->right
-  
+rotate_right(tree *T, node *x) {
+  node *y = x->right;
+  x->right = y->left;
+  if (!is_nil(y->left)) {
+    y->left->p = x;
+  }
+  y->p = x->p;
+  if (is_nil(x->p))
+    T->root = y;
+  else if (x == x->p->left)
+    x->p->left = y;
+  else
+    x->p->right = y;
+  y->left = x;
+  x->p = y;
 }
 
 
