@@ -56,6 +56,9 @@ int parent(int);
 int left_child(int);
 int right_child(int);
 
+tree * construct_tree(const long [], const size_t, long (*getkey)(void*));
+
+
 int find_height(node*, int);
 int tree_height(tree*);
 

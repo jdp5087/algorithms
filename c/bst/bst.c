@@ -60,6 +60,9 @@ init_node(tree *T, void *obj, long (*getkey)(void*))
   n->obj = obj;
   n->left = T->nil;
   n->right = T->nil;
+#ifdef RED_BLACK_TREE
+  n->color = RED;
+#endif
   return n;
 }
 
@@ -195,10 +198,9 @@ print_tree(tree *T)
 	   "Reducing height to 4 and continuing.\n\n");
     h = 4;
   }
-  int n = (two_pow(h+1) - 1);
-
   int i = 0;
   int j;
+  int n = (two_pow(h+1) - 1);
   long node_keys[n];
   while (i < n) {
     node_keys[i] = -1;
@@ -315,6 +317,18 @@ tree_search(node *x, long k)
     }
     return x;
 }
+
+
+// rewrite without transplant and do checks for T.nil in y and if x.p == t.nil
+void
+rotate_left(tree *T, node *x) {
+  node *y = x->left;
+  transplant(T, x->left, y-right);
+  transplant(T, y->right, x);
+  y->right
+  
+}
+
 
 // 
 // {0, 1, 2, 3, 4, 5 ,6};
