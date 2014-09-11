@@ -19,14 +19,14 @@ struct _node;
 
 typedef struct _node {
 #ifdef RED_BLACK_TREE
-  int color;
+	int color;
 #endif /* include extra color attribute for red black trees */
-  int nil;
-  long key;
-  struct _node *p;
-  struct _node *left;
-  struct _node *right;
-  void *obj;
+	int nil;
+	long key;
+	struct _node *p;
+	struct _node *left;
+	struct _node *right;
+	void *obj;
 } node;
 
 #endif /* BINARY_SEARCH_TREE_NODE */
@@ -35,8 +35,8 @@ typedef struct _node {
 #define BINARY_SEARCH_TREE
 
 typedef struct _tree {
-  node *root;
-  node *nil;
+	node *root;
+	node *nil;
 } tree;
 
 #endif /* BINARY_SEARCH_TREE */
