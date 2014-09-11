@@ -1,11 +1,11 @@
 bst.o: bst.c bst.h
-	gcc -c bst.c -o bst.o
+	gcc $(DEBUG) -c bst.c -o bst.o
 
 rbtree.o: rbtree.c rbtree.h bst.h
-	gcc -c rbtree.c - rbtree.o
+	gcc $(DEBUG) -c rbtree.c -o rbtree.o
 
-bst: bst.o
-	gcc bst.o -o bst
+main.o: main.c bst.h rbtree.h
+	gcc $(DEBUG) -c main.c -o main.o
 
-rbtree: bst.o rbtree.o
-	gcc rbtree.o bst.o -o rbtree
+main: main.o rbtree.o bst.o bst.h rbtree.h
+	gcc $(DEBUG) main.o rbtree.o bst.o -o main

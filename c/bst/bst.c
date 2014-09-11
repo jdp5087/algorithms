@@ -15,6 +15,7 @@ void dealloc_tree_rec(node *n)
 	if (!is_nil(n->right))
 		dealloc_tree_rec(n->right);
 	free(n);
+
 }
 
 void dealloc_tree(tree *T)
@@ -37,10 +38,10 @@ tree * init_tree(void)
 node * init_null(void)
 {
 	node *n = (node*)malloc(sizeof(node));
+	n->nil = 1;
 #ifdef RED_BLACK_TREE
 	n->color = BLACK;
 #endif /* set color to black on T.nil */
-	n->nil = 1;
 	return n;
 }
 
@@ -92,7 +93,7 @@ tree * construct_tree(const long arr[], const size_t arrlen, long (*getkey)(void
 	for (i; i < arrlen; i++) {
 		current = arr[i];
 		n = init_node(T, (void*)&current, getkey);
-		tree_insert(T, n);
+		TREE_INS(T, n);
 	}
 	return T;
 }
@@ -285,12 +286,12 @@ node * tree_search(node *x, long k)
 }
 
 
-void rotate_right(tree *T, node *x) {
+void left_rotate(tree *T, node *x)
+{
 	node *y = x->right;
 	x->right = y->left;
-	if (!is_nil(y->left)) {
+	if (!is_nil(y->left))
 		y->left->p = x;
-	}
 	y->p = x->p;
 	if (is_nil(x->p))
 		T->root = y;
@@ -302,20 +303,19 @@ void rotate_right(tree *T, node *x) {
 	x->p = y;
 }
 
-
-// 
-// {0, 1, 2, 3, 4, 5 ,6};
-int main()
+void right_rotate(tree *T, node *x)
 {
-	const long arr[] = {50, 25, 75, 1, 40, 60, 90}; 
-	size_t len = (sizeof(arr)/sizeof(long));
-	tree *T = construct_tree(arr, len, intgetkey);
-	node *x = tree_maximum(T->root);
-	while (!is_nil(x)) {
-		printf("%ld\n", x->key);
-		x = tree_predecessor(x);
-	}
-	print_tree(T);
-	dealloc_tree(T);
-	return 0;
+	node *y = x->left;
+	x->left = y->right;
+	if (!is_nil(y->right))
+		y->right->p = x;
+	y->p = x->p;
+	if (is_nil(x->p))
+		T->root = y;
+	else if (x == x->p->left)
+		x->p->left = y;
+	else
+		x->p->right = y;
+	y->right = x;
+	x->p = y;
 }
