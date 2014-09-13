@@ -1,7 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "main.h"
+#include "rbtree.h"
 #include "bst.h"
+
 
 int is_nil(node *n)
 {
@@ -84,7 +87,7 @@ long intgetkey(void *obj)
 	return *(long*)obj;
 }
 
-tree * construct_tree(const long arr[], const size_t arrlen, long (*getkey)(void*))
+tree * construct_tree(long arr[], const size_t arrlen, long (*getkey)(void*))
 {
 	int i = 0;
 	long current;
@@ -168,6 +171,7 @@ void print_tree(tree *T)
 {
 	printf("\n");
 	int h = tree_height(T);
+	printf("height: %d\n", h);
 	if (h > 4) {
 		printf("Heights of greater than 4 cannot be formatted correctly. " \
 		       "Reducing height to 4 and continuing.\n\n");

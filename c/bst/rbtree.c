@@ -1,4 +1,9 @@
+#include <stdio.h>
+
+#include "main.h"
 #include "rbtree.h"
+#include "bst.h"
+
 
 void rb_insert(tree *T, node *z)
 {
@@ -31,7 +36,7 @@ void rb_insert_fixup(tree *T, node *z)
 	// z is always red, so if z.p is red, we violate rb property
 	while (z->p->color == RED) {
 		// first three cases
-		if (z->p = z->p->p->left) {
+		if (z->p == z->p->p->left) {
 			// z's uncle
 			y = z->p->p->right;
 			// we can't rotate and quit without changing
@@ -42,26 +47,31 @@ void rb_insert_fixup(tree *T, node *z)
 				z->p->color = BLACK;
 				y->color = BLACK;
 				z->p->p->color = RED;
-			} else if (z == z->p->right) { // we can make rotations and quit
-				z = z->p;
-				left_rotate(T, z);
+			} else {
+				if (z == z->p->right) { // we can make rotations and quit
+					z = z->p;
+					left_rotate(T, z);
+				}
+				z->p->color = BLACK;
+				z->p->p->color = RED;
+				right_rotate(T, z->p->p);
 			}
-			z->p->color = BLACK;
-			z->p->p->color = RED;
-			right_rotate(T, z->p->p);
 		} else { // second three cases when z = z.p.p.right
+			
 			y = z->p->p->left;
 			if (y->color == RED) {
 				z->p->color = BLACK;
 				y->color = BLACK;
 				z->p->p->color = RED;
-			} else if (z == z->p->left) {
-				z = z->p;
-				right_rotate(T, z);
+			} else {
+				if (z == z->p->left) {
+					z = z->p;
+					right_rotate(T, z);
+				}
+				z->p->color = BLACK;
+				z->p->p->color = RED;
+				left_rotate(T, z->p->p);
 			}
-			z->p->color = BLACK;
-			z->p->p->color = RED;
-			left_rotate(T, z->p->p);
 		}
 	}
 	// if we inserted a node into an empty tree, the root is red

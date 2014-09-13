@@ -1,6 +1,8 @@
-struct _tree;
+
+#ifndef BST
 #define BST
 
+struct _tree;
 struct _node;
 
 #ifndef SCREEN_WIDTH
@@ -15,10 +17,8 @@ struct _node;
 #define NIL 1
 #endif /* NIL */
 
-
 #ifndef BINARY_SEARCH_TREE_NODE
 #define BINARY_SEARCH_TREE_NODE
-
 typedef struct _node {
 #ifdef RED_BLACK_TREE
 	int color;
@@ -30,29 +30,26 @@ typedef struct _node {
 	struct _node *right;
 	void *obj;
 } node;
-
 #endif /* BINARY_SEARCH_TREE_NODE */
 
 #ifndef BINARY_SEARCH_TREE
 #define BINARY_SEARCH_TREE
-
 typedef struct _tree {
 	node *root;
 	node *nil;
 } tree;
-
 #endif /* BINARY_SEARCH_TREE */
 
 void tree_insert(tree*, node*);
 
-
 #ifdef RED_BLACK_TREE
-#define TREE_INS(TREE, NODE) {rb_insert(TREE, NODE);}
-
+#define TREE_INS(TREE, NODE) rb_insert(TREE, NODE)
 #else
-#define TREE_INS(TREE, NODE) {tree_insert(TREE, NODE);}
+#define TREE_INS(TREE, NODE) tree_insert(TREE, NODE)
+#endif /* TREE_INS */
 
-#endif /*TREE_INS */
+
+
 
 int is_nil(node*);
 void dealloc_tree_rec(node*);
@@ -65,7 +62,7 @@ node * init_node(tree *, void *, long (*getkey)(void *));
 
 long intgetkey(void*);
 
-tree * construct_tree(const long [], const size_t, long (*getkey)(void*));
+tree * construct_tree(long [], const size_t, long (*getkey)(void*));
 
 int parent(int);
 int left_child(int);
@@ -93,3 +90,5 @@ void transplant(tree*, node*, node*);
 
 void left_rotate(tree*, node*);
 void right_rotate(tree*, node*);
+
+#endif /* BST */
