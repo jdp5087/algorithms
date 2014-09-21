@@ -58,11 +58,11 @@ void dealloc_tree(tree*);
 
 tree * init_tree(void);
 node * init_null(void);
-node * init_node(tree *, void *, long (*getkey)(void *));
+node * init_node(tree *, void *, unsigned long (*getkey)(void *));
 
-long intgetkey(void*);
+unsigned long intgetkey(void*);
 
-tree * construct_tree(long [], const size_t, long (*getkey)(void*));
+tree * construct_tree(unsigned long *, const size_t, unsigned long (*getkey)(void*));
 
 int parent(int);
 int left_child(int);

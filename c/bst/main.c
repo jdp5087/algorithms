@@ -19,14 +19,18 @@ int main()
 	*/
 	int n = 1048575;
 	srand(time(NULL));
-	long arr[n];
+	unsigned long arr[n];
+	printf("size: %d\n", sizeof(&arr));
 	for (i=0; i<n; i++) {
-		arr[i] = (long) i + 1;
+		arr[i] = (unsigned long) rand();
 	}
-	printf("Got here\n");
-	size_t len = (sizeof(arr)/sizeof(long));
-	tree *T = construct_tree(arr, len, intgetkey);
-	printf("Got here, too!\n");
+
+	size_t len = (sizeof(arr)/sizeof(unsigned long));
+	printf("Size of array: %d\n", len);
+	printf("size of array: %d\n", sizeof(arr));
+	printf("Starts at: %p, ends at: %p\n", &arr, ((void*)(unsigned long)&arr + sizeof(arr)));
+	tree *T = construct_tree((unsigned long *)&arr, len, intgetkey);
+
 	
 	/* node *x = tree_maximum(T->root); */
 	/* while (!is_nil(x)) { */

@@ -48,7 +48,7 @@ node * init_null(void)
 	return n;
 }
 
-node * init_node(tree *T, void *obj, long (*getkey)(void*))
+node * init_node(tree *T, void *obj, unsigned long (*getkey)(void*))
 {
 	node *n = (node*)malloc(sizeof(node));
 	n->nil = 0;
@@ -82,20 +82,28 @@ void tree_insert(tree *T, node *z)
 		y->right = z;
 }
 
-long intgetkey(void *obj)
+unsigned long intgetkey(void *obj)
 {
-	return *(long*)obj;
+	return *(unsigned long *)obj;
 }
 
-tree * construct_tree(long arr[], const size_t arrlen, long (*getkey)(void*))
+tree * construct_tree(unsigned long *arr, const size_t arrlen, unsigned long (*getkey)(void*))
 {
-	int i = 0;
-	long current;
+	unsigned long *i;
+	printf("length of array: %d\n", arrlen);
+	printf("location of start: %p\n", arr);
+	printf("value of calculation: %d\n", (arrlen * sizeof(unsigned long *)));
+	unsigned long *stop = (arr + (arrlen * sizeof(unsigned long *)));
+	printf("(stop - start)/4: %d\n", (stop - arr)/4);
+	printf("location of stop: %p\n", stop);
+
 	tree *T = init_tree();
 	node *n;
-	for (i; i < arrlen; i++) {
-		current = arr[i];
-		n = init_node(T, (void*)&current, getkey);
+	printf("(stop - start)/4: %d\n", (stop - arr)/4);
+	printf("location of stop: %p\n", stop);
+
+	for (i = arr; i < stop; i += sizeof(unsigned long *)) {
+		n = init_node(T, (void*)i, getkey);
 		TREE_INS(T, n);
 	}
 	return T;
