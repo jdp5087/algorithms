@@ -47,6 +47,7 @@ void rb_insert_fixup(tree *T, node *z)
 				z->p->color = BLACK;
 				y->color = BLACK;
 				z->p->p->color = RED;
+				z = z->p->p;
 			} else {
 				if (z == z->p->right) { // we can make rotations and quit
 					z = z->p;
@@ -63,6 +64,7 @@ void rb_insert_fixup(tree *T, node *z)
 				z->p->color = BLACK;
 				y->color = BLACK;
 				z->p->p->color = RED;
+				z = z->p->p;
 			} else {
 				if (z == z->p->left) {
 					z = z->p;
