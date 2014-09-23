@@ -1,9 +1,60 @@
+struct _tree;
+struct _node;
+
+#ifndef RED_BLACK_TREE
+#define RED_BLACK_TREE
+#define BLACK 0
+#define RED 1
+#endif /* RED_BLACK_TREE */
+
+#ifndef TRACK_TREE_ALLOCATION
+#define TRACK_TREE_ALLOCATION
+#define MAX_TREES 16
+
+
+void dealloc_tree(struct _tree *);
+
+struct tree_entries {
+	struct _tree *trees[MAX_TREES];
+	int entries;
+};
+
+#define INIT_TREE_ENTRIES(name)				\
+	do {						\
+		struct tree_entries name;		\
+		(&name)->entries = 0;			\
+	} while(0)
+
+#define TREE_ENTRIES_FULL(trees)				\
+	(&trees)->entries == (MAX_TREES - 1)
+
+
+#define INSERT_TREE_ENTRY(trees_struct, tree)					\
+	do {								\
+		if (!(TREE_ENTRIES_FULL(trees_struct))) {			\
+			(&trees_struct)->entries += 1;				\
+			(&trees_struct)->trees[(&trees_struct)->entries] = tree;	\
+		}							\
+	} while(0)
+
+static inline void dealloc_trees(struct tree_entries entries)
+{
+	int i = 0;
+	struct _tree *temp;
+	while (i < (&entries)->entries) {
+		temp = (&entries)->trees[i];
+		(&entries)->trees[i] = NULL;
+		dealloc_tree(temp);
+		i++;
+	}
+
+}
+
+extern void dealloc_trees(struct tree_entries);
+#endif /* TRACK_TREE_ALLOCATION */
 
 #ifndef BST
 #define BST
-
-struct _tree;
-struct _node;
 
 #ifndef SCREEN_WIDTH
 #define SCREEN_WIDTH 98
@@ -42,27 +93,20 @@ typedef struct _tree {
 
 void tree_insert(tree*, node*);
 
-#ifdef RED_BLACK_TREE
-#define TREE_INS(TREE, NODE) rb_insert(TREE, NODE)
-#else
-#define TREE_INS(TREE, NODE) tree_insert(TREE, NODE)
-#endif /* TREE_INS */
-
-
-
-
 int is_nil(node*);
 void dealloc_tree_rec(node*);
 void dealloc_tree(tree*);
-
-
+#ifdef TRACK_TREE_ALLOCATION
+tree * init_tree(struct tree_entries);
+#else
 tree * init_tree(void);
+#endif /* TRACK_TREE_ALLOCATION */
 node * init_null(void);
 node * init_node(tree *, void *, long (*getkey)(void *));
 
 long intgetkey(void*);
 
-tree * construct_tree(long [], const size_t, long (*getkey)(void*));
+tree * construct_tree(long [], const size_t, long (*getkey)(void*), struct tree_entries);
 
 int parent(int);
 int left_child(int);

@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "main.h"
-#include "rbtree.h"
 #include "bst.h"
 
 // {50, 25, 75, 1, 40, 60, 90}; 
@@ -39,9 +37,10 @@ int main()
 	}
 	printf("Got here\n");
 	size_t len = (sizeof(arr)/sizeof(long));
-	tree *T = construct_tree(arr, len, intgetkey);
+	INIT_TREE_ENTRIES(trees);
+	tree *T = construct_tree(arr, len, intgetkey, trees);
 	printf("Got here, too!\n");
-	
+
 	/* node *x = tree_maximum(T->root); */
 	/* while (!is_nil(x)) { */
 	/* 	printf("%ld\n", x->key); */

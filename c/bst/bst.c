@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include "main.h"
-#include "rbtree.h"
 #include "bst.h"
 
 
@@ -29,11 +28,15 @@ void dealloc_tree(tree *T)
 	free(T);
 }
 
+#ifdef TRACK_TREE_ALLOCATION
+tree * init_tree(struct tree_entries *trees)
+#else
 tree * init_tree(void)
+#endif /* TRACK_TREE_ALLOCATION */
 {
 	tree *T = (tree*)malloc(sizeof(tree));
 #ifdef TRACK_TREE_ALLOCATION
-	INSERT_TREE_ENTRY(total_trees, T);
+	INSERT_TREE_ENTRY(trees, T);
 #endif /* TRACK_TREE_ALLOCATION */
 	node *n = init_null();
 	T->nil = n;
@@ -65,6 +68,86 @@ node * init_node(tree *T, void *obj, long (*getkey)(void*))
 	return n;
 }
 
+#ifdef RED_BLACK_TREE
+void tree_insert(tree *T, node *z)
+{
+	node *y = T->nil;
+	node *x = T->root;
+	while (!is_nil(x)) {
+		y = x;
+		if (z->key < x->key)
+			x = x->left;
+		else
+			x = x->right;
+	}
+	z->p = y;
+	if (y == T->nil)
+		T->root = z;
+	else if (z->key < y->key)
+		y->left = z;
+	else
+		y->right = z;
+	z->left = T->nil;
+	z->right = T->nil;
+	z->color = RED;
+	rb_insert_fixup(T, z);
+}
+
+void rb_insert_fixup(tree *T, node *z)
+{
+	node *y;
+	// z is always red, so if z.p is red, we violate rb property
+	while (z->p->color == RED) {
+		// first three cases
+		if (z->p == z->p->p->left) {
+			// z's uncle
+			y = z->p->p->right;
+			// we can't rotate and quit without changing
+			// black height of z, so we change
+			// z.p and z's uncle to black and move
+			// the red to z.p.p
+			if (y->color == RED) {
+				z->p->color = BLACK;
+				y->color = BLACK;
+				z->p->p->color = RED;
+				z = z->p->p;
+			} else {
+				if (z == z->p->right) { // we can make rotations and quit
+					z = z->p;
+					left_rotate(T, z);
+				}
+				z->p->color = BLACK;
+				z->p->p->color = RED;
+				right_rotate(T, z->p->p);
+			}
+		} else { // second three cases when z = z.p.p.right
+			
+			y = z->p->p->left;
+			if (y->color == RED) {
+				z->p->color = BLACK;
+				y->color = BLACK;
+				z->p->p->color = RED;
+				z = z->p->p;
+			} else {
+				if (z == z->p->left) {
+					z = z->p;
+					right_rotate(T, z);
+				}
+				z->p->color = BLACK;
+				z->p->p->color = RED;
+				left_rotate(T, z->p->p);
+			}
+		}
+	}
+	// if we inserted a node into an empty tree, the root is red
+	// or z.p.p got set to red in case 1 or 4
+	T->root->color = BLACK;
+}
+
+#else
+
+
+
 void tree_insert(tree *T, node *z)
 {
 	node *y = T->nil;
@@ -85,24 +168,35 @@ void tree_insert(tree *T, node *z)
 		y->right = z;
 }
 
+void tree_delete(tree *T, node *z)
+{
+	if (is_nil(z->left)) {
+		transplant(T, z, z->right);
+	}
+	else if (is_nil(z->right)) {
+		transplant(T, z, z->left);
+	}
+	else {
+		node *y = tree_minimum(z->right);
+		if (y->p != z) {
+			transplant(T, y, y->right);
+			y->right = z->right;
+			y->right->p = y;
+		}
+		transplant(T, z, y);
+		y->left = z->left;
+		
+		y->left->p = y;
+	}
+}
+
+#endif /* RED_BLACK_TREE */
+
 long intgetkey(void *obj)
 {
 	return *(long*)obj;
 }
 
-tree * construct_tree(long arr[], const size_t arrlen, long (*getkey)(void*))
-{
-	int i = 0;
-	long current;
-	tree *T = init_tree();
-	node *n;
-	for (i; i < arrlen; i++) {
-		current = arr[i];
-		n = init_node(T, (void*)&current, getkey);
-		TREE_INS(T, n);
-	}
-	return T;
-}
 
 int parent(int i)
 {
@@ -259,27 +353,6 @@ node * tree_predecessor(node *x)
 	return y;
 }
 
-void tree_delete(tree *T, node *z)
-{
-	if (is_nil(z->left)) {
-		transplant(T, z, z->right);
-	}
-	else if (is_nil(z->right)) {
-		transplant(T, z, z->left);
-	}
-	else {
-		node *y = tree_minimum(z->right);
-		if (y->p != z) {
-			transplant(T, y, y->right);
-			y->right = z->right;
-			y->right->p = y;
-		}
-		transplant(T, z, y);
-		y->left = z->left;
-		
-		y->left->p = y;
-	}
-}
 
 node * tree_search(node *x, long k)
 {
@@ -325,4 +398,18 @@ void right_rotate(tree *T, node *x)
 		x->p->right = y;
 	y->right = x;
 	x->p = y;
+}
+
+tree * construct_tree(long arr[], const size_t arrlen, long (*getkey)(void*), struct tree_entries trees)
+{
+	int i = 0;
+	long current;
+	tree *T = init_tree(trees);
+	node *n;
+	for (i; i < arrlen; i++) {
+		current = arr[i];
+		n = init_node(T, (void*)&current, getkey);
+		tree_insert(T, n);
+	}
+	return T;
 }
