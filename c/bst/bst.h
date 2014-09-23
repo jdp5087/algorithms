@@ -1,10 +1,13 @@
 struct _tree;
 struct _node;
 
-#ifndef RED_BLACK_TREE
+#ifdef RED_BLACK_TREE
 #define RED_BLACK_TREE
 #define BLACK 0
 #define RED 1
+
+void rb_insert_fixup(struct _tree *, struct _node *);
+
 #endif /* RED_BLACK_TREE */
 
 #ifndef TRACK_TREE_ALLOCATION
@@ -20,20 +23,18 @@ struct tree_entries {
 };
 
 #define INIT_TREE_ENTRIES(name)				\
-	do {						\
-		struct tree_entries name;		\
-		(&name)->entries = 0;			\
-	} while(0)
+	struct tree_entries name;			\
+	(&name)->entries = 0;				\
 
 #define TREE_ENTRIES_FULL(trees)				\
-	(&trees)->entries == (MAX_TREES - 1)
+	((trees)->entries == (MAX_TREES - 1))
 
-
-#define INSERT_TREE_ENTRY(trees_struct, tree)					\
+#define INSERT_TREE_ENTRY(trees_struct, tree)				\
 	do {								\
-		if (!(TREE_ENTRIES_FULL(trees_struct))) {			\
-			(&trees_struct)->entries += 1;				\
-			(&trees_struct)->trees[(&trees_struct)->entries] = tree;	\
+		typeof(trees_struct) __trees = (trees_struct);		\
+		if (!TREE_ENTRIES_FULL(__trees)) {			\
+			(__trees)->entries += 1;			\
+			(__trees)->trees[(__trees)->entries] = tree;	\
 		}							\
 	} while(0)
 
@@ -97,7 +98,7 @@ int is_nil(node*);
 void dealloc_tree_rec(node*);
 void dealloc_tree(tree*);
 #ifdef TRACK_TREE_ALLOCATION
-tree * init_tree(struct tree_entries);
+tree * init_tree(struct tree_entries *);
 #else
 tree * init_tree(void);
 #endif /* TRACK_TREE_ALLOCATION */
@@ -106,7 +107,7 @@ node * init_node(tree *, void *, long (*getkey)(void *));
 
 long intgetkey(void*);
 
-tree * construct_tree(long [], const size_t, long (*getkey)(void*), struct tree_entries);
+tree * construct_tree(long [], const size_t, long (*getkey)(void*), struct tree_entries *);
 
 int parent(int);
 int left_child(int);

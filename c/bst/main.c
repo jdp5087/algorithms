@@ -29,7 +29,7 @@ int main()
 	*/
 
 
-	int n = 1048575;
+	int n = 255;
 	srand(time(NULL));
 	long arr[n];
 	for (i=0; i<n; i++) {
@@ -37,8 +37,8 @@ int main()
 	}
 	printf("Got here\n");
 	size_t len = (sizeof(arr)/sizeof(long));
-	INIT_TREE_ENTRIES(trees);
-	tree *T = construct_tree(arr, len, intgetkey, trees);
+	INIT_TREE_ENTRIES(trees)
+	tree *T = construct_tree(arr, len, intgetkey, &trees);
 	printf("Got here, too!\n");
 
 	/* node *x = tree_maximum(T->root); */
@@ -48,7 +48,7 @@ int main()
 //	}
 	print_tree(T);
 	printf("Got here, finally\n");
-	dealloc_trees(total_trees);
+	dealloc_trees(trees);
 	return 0;
 }
 

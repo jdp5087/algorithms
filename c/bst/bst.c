@@ -93,7 +93,7 @@ void tree_insert(tree *T, node *z)
 	rb_insert_fixup(T, z);
 }
 
-void rb_insert_fixup(tree *T, node *z)
+void rb_insert_fixup(struct _tree *T, struct _node *z)
 {
 	node *y;
 	// z is always red, so if z.p is red, we violate rb property
@@ -400,7 +400,7 @@ void right_rotate(tree *T, node *x)
 	x->p = y;
 }
 
-tree * construct_tree(long arr[], const size_t arrlen, long (*getkey)(void*), struct tree_entries trees)
+tree * construct_tree(long arr[], const size_t arrlen, long (*getkey)(void*), struct tree_entries *trees)
 {
 	int i = 0;
 	long current;
