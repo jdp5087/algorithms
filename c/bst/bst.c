@@ -32,6 +32,9 @@ void dealloc_tree(tree *T)
 tree * init_tree(void)
 {
 	tree *T = (tree*)malloc(sizeof(tree));
+#ifdef TRACK_TREE_ALLOCATION
+	INSERT_TREE_ENTRY(total_trees, T);
+#endif /* TRACK_TREE_ALLOCATION */
 	node *n = init_null();
 	T->nil = n;
 	T->root = T->nil;

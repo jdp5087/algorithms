@@ -1,6 +1,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 
 #include "main.h"
 #include "rbtree.h"
@@ -8,6 +9,17 @@
 
 // {50, 25, 75, 1, 40, 60, 90}; 
 // 
+
+
+
+/* void sig_int_handler(int signo) */
+/* { */
+/* 	if (signo == SIGINT) { */
+/* 		if ( */
+/* 	} */
+		
+/* } */
+
 int main()
 {
 	int i;
@@ -17,11 +29,13 @@ int main()
 	   While mathematically proven, it is still impressive
 	   to see it in practice (2*lg(1048575+1) == 40).
 	*/
+
+
 	int n = 1048575;
 	srand(time(NULL));
 	long arr[n];
 	for (i=0; i<n; i++) {
-		arr[i] = (long) i + 1;
+		arr[i] = (long) rand();
 	}
 	printf("Got here\n");
 	size_t len = (sizeof(arr)/sizeof(long));
@@ -35,7 +49,7 @@ int main()
 //	}
 	print_tree(T);
 	printf("Got here, finally\n");
-	dealloc_tree(T);
+	dealloc_trees(total_trees);
 	return 0;
 }
 
