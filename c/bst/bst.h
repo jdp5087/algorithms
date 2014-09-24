@@ -33,8 +33,8 @@ struct tree_entries {
 	do {								\
 		typeof(trees_struct) __trees = (trees_struct);		\
 		if (!TREE_ENTRIES_FULL(__trees)) {			\
-			(__trees)->entries += 1;			\
 			(__trees)->trees[(__trees)->entries] = tree;	\
+			(__trees)->entries += 1;			\
 		}							\
 	} while(0)
 
@@ -42,8 +42,10 @@ static inline void dealloc_trees(struct tree_entries entries)
 {
 	int i = 0;
 	struct _tree *temp;
+
 	while (i < (&entries)->entries) {
 		temp = (&entries)->trees[i];
+		printf("second address: %p\n", temp);
 		(&entries)->trees[i] = NULL;
 		dealloc_tree(temp);
 		i++;

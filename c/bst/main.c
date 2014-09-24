@@ -8,15 +8,20 @@
 // {50, 25, 75, 1, 40, 60, 90}; 
 // 
 
+struct tree_entries trees = {
+	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	0
+};
 
 
-/* void sig_int_handler(int signo) */
-/* { */
-/* 	if (signo == SIGINT) { */
-/* 		if ( */
-/* 	} */
+
+void sig_int_handler(int signo)
+{
+	if (signo == SIGINT) {
+		dealloc_trees(trees);
+	}
 		
-/* } */
+}
 
 int main()
 {
@@ -29,15 +34,18 @@ int main()
 	*/
 
 
-	int n = 255;
+	if (signal(SIGINT, sig_int_handler) == SIG_ERR)
+		printf("Cannot catch SIGINT\n");
+
+	int n = 262144;
 	srand(time(NULL));
 	long arr[n];
 	for (i=0; i<n; i++) {
-		arr[i] = (long) rand();
+		arr[i] = (long) i+1;
 	}
 	printf("Got here\n");
 	size_t len = (sizeof(arr)/sizeof(long));
-	INIT_TREE_ENTRIES(trees)
+
 	tree *T = construct_tree(arr, len, intgetkey, &trees);
 	printf("Got here, too!\n");
 

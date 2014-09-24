@@ -405,6 +405,7 @@ tree * construct_tree(long arr[], const size_t arrlen, long (*getkey)(void*), st
 	int i = 0;
 	long current;
 	tree *T = init_tree(trees);
+	printf("first address: %p\n", T);
 	node *n;
 	for (i; i < arrlen; i++) {
 		current = arr[i];
