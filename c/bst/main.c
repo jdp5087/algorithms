@@ -5,6 +5,7 @@
 
 #include "bst.h"
 
+
 // {50, 25, 75, 1, 40, 60, 90}; 
 // 
 
@@ -22,6 +23,8 @@ void sig_int_handler(int signo)
 	}
 		
 }
+
+/* some sort of functionality to delete random nodes from tree here */
 
 int main()
 {

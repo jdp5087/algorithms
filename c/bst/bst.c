@@ -144,6 +144,140 @@ void rb_insert_fixup(struct _tree *T, struct _node *z)
 	T->root->color = BLACK;
 }
 
+void transplant(tree *T, node *u, node *v)
+{
+	if(is_nil(u->p))
+		T->root = v;
+	else if (u == u->p->left)
+		u->p->left = v;
+	else
+		u->p->right = v;
+	v->p = u->p;
+}
+
+void rb_delete_fixup(tree *T, node *x)
+{
+	
+	node *w;
+	while ((x != T->root) && (x->color == BLACK)) {
+		/* while predicate only true if x is doubly black
+		 the +1 black is signified by x's pointing to a node.
+		Therefore, the black has been distributed when x->color == red
+		or x == T->root, because T->root will add +1 to all subtrees evenly.*/
+		if (x == x->p->left) {
+			w = x->p->right;
+			if (w->color == RED) {
+				/* convert to case 2, 3, or 4 safely */
+				w->color = BLACK;
+				x->p->color = RED;
+				left_rotate(T, x->p);
+				w = x->p->right;
+			}
+			if ((w->left->color == BLACK) &&
+			    (w->right->color == BLACK)) {
+				/* distribute an extra black from subtree at x
+				   and w up the tree to x->p, this will cause
+				   termination iff x->p->color is red */
+				w->color = RED;
+				x = x->p;
+				continue;
+			} else if (w->right->color == BLACK) {
+				/* w->left->color == RED and w->right->color == BLACK
+				   so we can switch w->left and w's colors and rotate right,
+				   converting to case 4 */
+				w->left->color = BLACK;
+				w->color = RED;
+				right_rotate(T, w);
+				w = x->p->right;
+			}
+			/* fall through from case 3 to 4 if applicable
+			 w is black and x->right is red, we can distribute
+			 the extra black by rooting x->p and w->right on w,
+			 and making both of these nodes black, making w
+			 whatever x->p->color was */
+			w->color = x->p->color;
+			x->p->color = BLACK;
+			w->right->color = BLACK;
+			left_rotate(T, x->p);
+			x = T->root;
+			goto finish;
+		} else {
+			/* x == x->p->right
+			   this case mirrors the above */
+			w = x->p->left;
+			if (w->color == RED) {
+				w->color = BLACK;
+				x->p->color = RED;
+				right_rotate(T, x->p);
+				w = x->p->left;
+			}
+			if ((w->left->color == BLACK) &&
+			    (w->right->color == BLACK)) {
+				w->color = RED;
+				x = x->p;
+				continue;
+			} else if (w->left->color == BLACK) {
+				w->right->color = BLACK;
+				w->color = RED;
+				left_rotate(T, w);
+				w = x->p->left;
+			}
+			w->color = x->p->color;
+			x->p->color = BLACK;
+			w->left->color = BLACK;
+			right_rotate(T, x->p);
+			x = T->root;
+			goto finish;
+		}
+	}
+finish:	
+	x->color = BLACK;
+}
+
+void tree_delete(tree *T, node *z)
+{
+	/* In the first two cases, y == z, in the third y == tree_minimum(z->right) */
+	node *y = z;
+	/* x will be a child of y */
+	node *x;
+	int y_original_color = y->color;
+	if (is_nil(z->left)) {
+		/* we can just replace z with z->right */
+		x = z->right;
+		transplant(T, z, z->right);
+	} else if (is_nil(z->right)) {
+		/* replace z with z->left */
+		x = z->left;
+		transplant(T, z, z->left);
+	} else {
+		/* z's successor will be tree_min y->right */
+		y = tree_minimum(z->right);
+		y_original_color = y->color;
+		/* it is guaranteed that x->left is T->nil */
+		x = y->right;
+		if (y->p == z) {
+			/* no need to transplant x into y's place in this case */
+			x->p = y;
+		} else {
+			/* otherwise, transplant x into y's place and then to free y up */
+			transplant(T, y, y->right);
+			y->right = z->right;
+			y->right->p = y;
+		}
+		/* now replace z with y */
+		transplant(T, z, y);
+		y->left = z->left;
+		y->left->p = y;
+		y->color = z->color;
+	}
+	if (y_original_color == BLACK)
+		/* if y was black, it is now doubly black or red-and black, and the b.h.
+		   of any node between z and x has altered, causing
+		   a violation of the property that every path from any internal node to a leaf has the same
+		   number of black nodes, so fix it */
+		rb_delete_fixup(T, x);
+}
+
 #else
 
 
@@ -167,6 +301,19 @@ void tree_insert(tree *T, node *z)
 	else
 		y->right = z;
 }
+
+void transplant(tree *T, node *u, node *v)
+{
+	if (is_nil(u->p))
+		T->root = v;
+	else if (u = u->p->left)
+		u->p->left = v;
+	else
+		u->p->right = v;
+	if (!is_nil(v))
+		v->p = u->p;
+}
+
 
 void tree_delete(tree *T, node *z)
 {
@@ -301,17 +448,6 @@ void print_tree(tree *T)
 	}
 }
 
-void transplant(tree *T, node *u, node *v)
-{
-	if (is_nil(u->p))
-		T->root = v;
-	else if (u = u->p->left)
-		u->p->left = v;
-	else
-		u->p->right = v;
-	if (!is_nil(v))
-		v->p = u->p;
-}
 
 node * tree_minimum(node *x)
 {
