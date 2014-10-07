@@ -14,16 +14,17 @@ int mycomp(void *a, void *b)
 
 void merge(void *b, size_t s, int p, int q, int r, int (*cmp)(void *, void *))
 {
-	void *bp, *lp, *rp, *fp;
+	void *bp, *L, *R, *lp, *rp, *fp, *lstop, *rstop;
 	int n1 = (q - p + 1);
 	int n2 = (r - q);
 	int k, cmp_result;
-	void *L = malloc(s*n1);
+
+	L = malloc(s*n1);
 	if (L == NULL) {
 		printf("Allocation of %d bytes for L array failed.\n", n1);
 		exit(1);
 	}
-	void *R = malloc(s*n2);
+	R = malloc(s*n2);
 	if (R == NULL) {
 		printf("Allocation of %d bytes for R array failed.\n", n2);
 		exit(1);
@@ -33,8 +34,8 @@ void merge(void *b, size_t s, int p, int q, int r, int (*cmp)(void *, void *))
 	lp = L;
 	rp = R;
 	bp = b + p*s;
-	void *lstop = (L + n1*s);
-	void *rstop = (R + n2*s);
+	lstop = (L + n1*s);
+	rstop = (R + n2*s);
 	for (k = p; k <= r; k++) {
 		if (lp == lstop) {
 			fp = rp;
