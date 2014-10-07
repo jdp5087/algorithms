@@ -1,24 +1,20 @@
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 #include "mergesort.h"
 
-/* long pass_through(void *) */
+#define ARR_SIZE 100
 
-/* void merge(void *A[], long (*getkey)(void*), unsigned long p, unsigned long q, unsigned long r) */
-/* { */
-/* 	printf("%ul\n", A[2]); */
-/* } */
-
-int mycomp(void *a, void*b)
+int mycomp(void *a, void *b)
 {
 	return (int)(*(unsigned long *)a - *(unsigned long *)b);
 }
 
 void merge(void *b, size_t s, int p, int q, int r, int (*cmp)(void *, void *))
 {
-	void *lp, *rp, *fp;
+	void *bp, *lp, *rp, *fp;
 	int n1 = (q - p + 1);
 	int n2 = (r - q);
 	int k, cmp_result;
@@ -34,8 +30,11 @@ void merge(void *b, size_t s, int p, int q, int r, int (*cmp)(void *, void *))
 	}
 	memcpy(L, b + p*s, n1*s); /* move n1*s bytes from b + p to temp array L */
 	memcpy(R, b + (q + 1)*s, n2*s); /* move n2*s bytes from b + q + 1 to temp array R */
-	void *lstop = (L + (n1 - 1)*s);
-	void *rstop = (R + (n2 - 1)*s);
+	lp = L;
+	rp = R;
+	bp = b + p*s;
+	void *lstop = (L + n1*s);
+	void *rstop = (R + n2*s);
 	for (k = p; k <= r; k++) {
 		if (lp == lstop) {
 			fp = rp;
@@ -45,37 +44,49 @@ void merge(void *b, size_t s, int p, int q, int r, int (*cmp)(void *, void *))
 			goto finish;
 		}
 		cmp_result = cmp(lp, rp);
-		if (cmp_result >= 0) {
-			memcpy(b + k*s, lp, s);
+		if (cmp_result <= 0) {
+			memcpy(bp, lp, s);
+			bp += s;
 			lp += s;
 		} else {
-			memcpy(b + k*s, rp, s);
+			memcpy(bp, rp, s);
+			bp += s;
 			rp += s;
 		}
 	}
 finish:
-	while (k <= r) {
-		memcpy(b + k*s, fp, s);
-		fp += s;
-		k++;
+	if (k <= r) {
+		memcpy(bp, fp, ((r - k) + 1)*s);
 	}
 	free(L);
 	free(R);
+}
+
+void mergesort(void *b, size_t s, int p, int r, int (*cmp)(void *, void *))
+{
+	int q;
+	if (p < r) {
+		q = (p+r)/2; /* note that this will truncate, acting as a floor operation */
+		mergesort(b, s, p, q, cmp);
+		mergesort(b, s, q+1, r, cmp);
+		merge(b, s, p, q, r, cmp);
+	}
 }
 
 
 int main()
 {
 	int i;
-	unsigned long testarr[] = {9,8,7,6,5,4,3,2,1,0};
+	srand(time(NULL));
+	unsigned long testarr[ARR_SIZE];
+	for (i = 0; i < ARR_SIZE; i++) {
+		testarr[i] = rand();
+	}
 	int length = sizeof(testarr)/sizeof(unsigned long);
 	void *arr = (void*)&testarr;
-	merge(arr, sizeof(unsigned long), 0, 4, 9, mycomp);
+	mergesort(arr, sizeof(unsigned long), 0, length, mycomp);
 	for (i = 0; i < length; i++)
-		printf("lu\n", testarr[i]);
+		printf("%lu, ", testarr[i]);
+	printf("\n");
 	return 0;
 }
-/* include a size (of object) and length parameter in merge sort, this way, pointer arithmetic will be suffiecient
-   to manipulate the array.
-   This will be challenging, but a worthwhile exercise
-*/
