@@ -1,0 +1,102 @@
+PageAllocation
+The Linux page allocator, from mm/page_alloc.c, is the main memory allocation mechanism in the Linux kernel. It has to deal with allocations from many parts of the Linux kernel, under many different circumstances. Consequently the Linux page allocator is fairly complex, and easiest to understand in the context of its environment. Because of this, this wiki article begins with an explanation of exactly what the page allocator needs to do, before going into the details of how things are done.
+
+I am writing this article bit by bit whenever I feel like it. If you feel like writing something, go right ahead - RikvanRiel
+
+memory allocators
+gfp mask
+page allocation order
+alloc_pages
+_alloc_pages
+buddy allocator
+per-cpu page queues
+hot/cold pages
+NUMA tradeoffs
+
+memory allocators
+Various different parts of the Linux kernel allocate memory, under different circumstances. Most memory allocations happen on behalf of userspace programs; these allocations can use any memory in the system (highmem, zone_normal and dma) and, if free memory is low, can wait for memory to be freed by the pageout code. Page cache and page table allocations can also use any memory in the system and can wait for memory to be freed.
+
+Most kernel level allocations are different and can only use memory that is directly mapped into kernel address space (zone_normal and dma). Most, though not all, kernel level allocations can wait for memory to be freed, if free memory is low.
+
+Allocations from interrupt context are different. They can not wait for memory to be freed, so if free memory on the system is low at the time of the allocation, the allocation will simply fail.
+
+gfp mask
+The gfp_mask is used to tell the page allocator which pages can be allocated, whether the allocator can wait for more memory to be freed, etc. All the gfp flags are defined in include/linux/gfp.h:
+
+ /* Zone modifiers in GFP_ZONEMASK (see linux/mmzone.h - low two bits) */
+#define __GFP_DMA       0x01u
+#define __GFP_HIGHMEM   0x02u
+
+/*
+ * Action modifiers - doesn't change the zoning
+ *
+ * __GFP_REPEAT: Try hard to allocate the memory, but the allocation attempt
+ * _might_ fail.  This depends upon the particular VM implementation.
+ *
+ * __GFP_NOFAIL: The VM implementation _must_ retry infinitely: the caller
+ * cannot handle allocation failures.
+ *
+ * __GFP_NORETRY: The VM implementation must not retry indefinitely.
+ */
+#define __GFP_WAIT      0x10u   /* Can wait and reschedule? */
+#define __GFP_HIGH      0x20u   /* Should access emergency pools? */
+#define __GFP_IO        0x40u   /* Can start physical IO? */
+#define __GFP_FS        0x80u   /* Can call down to low-level FS? */
+#define __GFP_COLD      0x100u  /* Cache-cold page required */
+#define __GFP_NOWARN    0x200u  /* Suppress page allocation failure warning */
+#define __GFP_REPEAT    0x400u  /* Retry the allocation.  Might fail */
+#define __GFP_NOFAIL    0x800u  /* Retry for ever.  Cannot fail */
+#define __GFP_NORETRY   0x1000u /* Do not retry.  Might fail */
+#define __GFP_NO_GROW   0x2000u /* Slab internal usage */
+#define __GFP_COMP      0x4000u /* Add compound page metadata */
+#define __GFP_ZERO      0x8000u /* Return zeroed page on success */
+#define __GFP_NOMEMALLOC 0x10000u /* Don't use emergency reserves */
+#define __GFP_NORECLAIM  0x20000u /* No realy zone reclaim during allocation */
+
+page allocation order
+The 'order' of a page allocation is it's logarithm to the base 2, and the size of the allocation is 2order, an integral power-of-2 number of pages. 'Order' ranges from from 0 to MAX_ORDER-1.
+
+The smallest - and most frequent - page allocation is 20 or 1 page. The maximum allocation possible is 2MAX_ORDER-1 pages. MAX_ORDER is assigned a default value of 11 - resulting in a maximum allocation of 210 or 1024 pages. However it may be redefined at kernel configuration time with the option CONFIG_FORCE_MAX_ZONEORDER.
+
+
+alloc_pages
+For non NUMA enabled systems, include/linux/gfp.h::alloc_pages() is a macro which calls alloc_pages_node(), which checks and transforms it's arguments and then calls mm/page_alloc.c::_alloc_pages(); which according to it's prefatory comments, "is the 'heart' of the zoned buddy allocator".
+
+_alloc_pages
+_alloc_pages first iterates over each memory zone looking for the first one that contains eligible free pages available for allocation under it's gfp_mask argument. If one zone is full up it will normally skip to the next zone in the zonelist. However, if CONFIG_CPUSETS is true, it will try to reclaim pages with mm/vmscan.c::zone_reclaim(), for each full up zone, as it is encountered. If pages are initially available in the current zone, or if CONFIG_CPUSETS is true and it has attempted reclaim, it then calls buffered_rmqueue() to allocate a page from that zone.
+
+If the iteration just described fails, _alloc_pages then wakes up the kswapd task for each zone in the zonelist. It then repeats the iteration over the zonelist; however, adding the mask _GFP_HIGH to the gfp_mask in order to compute a lower watermark for each zone and thus tap into the reserve memory pools maintained for each zone.
+
+If this second iteration thus fails, and depending on the kernel context and calling process' state, it may go through yet a third iteration over the zonelist without checking the zone watermarks, absolutely 'scraping the bottom of the barrel'.
+
+If the memory allocation still does not succeed, _alloc pages will either give up, if called with GFP_ATOMIC (which lacks mask _GFP_WAIT); or will attempt synchronous page reclaim and zone balancing with mm/vmscan.c::try_to_free_pages(). In this process _alloc_pages executes a cond_resched() which may cause a sleep, which is why this branch is forbidden to allocations with GFP_ATOMIC.
+
+Depending on the allocation flags it may reattempt this rebalancing several times.
+
+If all else fails, then after some sanity testing it will call the OOM Killer.
+
+buddy allocator
+Most of the key data definitions and functions for the buddy system are in mm/page_alloc.c and include/linux/gfp.h.
+
+The free lists for the buddy system are maintained for each zone in struct zone->free_area, an array of MAX_ORDER free_area's:
+
+         struct free_area {
+                struct list_head        free_list;
+                unsigned long           nr_free;
+        };
+This structure was changed in kernel 2.6.11 to facilitate managing the buddy allocator without the bitmaps previously used for this purpose, and the 'order' of the pages in the free lists for the buddy system is now maintained in struct page->private (so long as the pages are unallocated). The logic of this change is described here by it's author; and also in the comments to the function _page_find_buddy() in mm/page_alloc.c.
+
+The free lists can be seen by typing Alt-SysRq-M or Shift-Scroll_lock in any virtual console window or by looking at /proc/buddyinfo.
+
+per-cpu page queues
+The Per-CPU Page/Pagesets code is a buffer between folks that allocate memory and the core buddy allocator inside the kernel. This buffer takes batches of pages in and out of the allocator and stores them in per-cpu lists. This has several advantages:
+
+No global locks are needed to allocate a page in the common case since the buffers are per-cpu
+
+Pages which are hot in a CPU's cache will get allocated back to other users on that CPU, preserving cache warmth.
+
+If the buffers are empty or full, the pages are pulled in and out in batches, so the cost of lock manipulation is amortized across the entire batch.
+
+It only buffers "order-0" (4k) pages, which are the vast, vast majority of allocations
+
+hot/cold pages
