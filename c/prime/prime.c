@@ -1,4 +1,18 @@
+#include <errno.h>
+#include <limits.h>
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define WORD_WIDTH 32
+#define MAX_MODULUS (1 << ((WORD_WIDTH)/2))
+
+/* value of s in miller rabin, will
+   yield a probability of (1/(2**30))
+   that miller_rabin falsely reports
+   a non-prime to be prime */
+#define MILLER_RABIN_ATTEMPTS 30 
 
 struct t_and_u {
 	unsigned long t;
@@ -62,21 +76,73 @@ int witness(unsigned long a, unsigned long n)
 	unsigned long i, t, u, xcur, xprev;
 	struct t_and_u tu;
 	
-	if (!(n & 1) && (n != 2)) /* n is a multiple of 2, so not prime */
+	if ((!(n & 1)) && (n != 2)) /* n is a multiple of 2, so not prime */
 		return 1;
 
 	get_t_and_u(&tu, (n - 1));
 
 	xcur = modexp(a, tu.u, n);
 
-	for (i = 0; i < tu.t, i++) {
+	for (i = 0; i < tu.t; i++) {
 		xprev = xcur;
 		xcur = modexp(xprev, 2, n);
-		if ((xcur == 1) && (xprev != 1) && (xprev != (n - 1)))
+		if ((xcur == 1) && (xprev != 1) && (xprev != (n - 1))) {
+			printf("nontrivial square root of 1 mod n\n");
 			return 1;
+		}
 	}
-	if (xcur != 1)
+	if (xcur != 1) {
+		printf("a**(n-1) is not congruent to 1 mod n\n");
 		return 1;
+	}
+	return 0;
+}
+
+/* returns true if prime, false if composite */
+int miller_rabin(unsigned long n, int s)
+{
+	int j;
+	unsigned long a;
+
+	if (n > MAX_MODULUS) {
+		printf("The use of a modulus larger than %d on a %d-bit sytem might overflow.\n",
+		       MAX_MODULUS,
+		       WORD_WIDTH);
+		exit(1);
+	}
+
+	for (j = 0; j < s; j++) {
+		a = ((unsigned long)rand() % (n - 1)) + 1;
+		if (witness(a, n))
+			return 0;
+	}
+	return 1;
+}
+
+/*
+  if high > MAX_MODULUS, We reduce high to MAX_MODULUS and continue.
+   will return a prime where l <= p <= h, or NULL if no prime found
+ */
+unsigned long find_prime(unsigned long l, unsigned long h)
+{
+	
+	unsigned long p, tmp;
+	if (h < l) {
+		tmp = h;
+		l = h;
+		l = tmp;
+	}
+	
+	if (h > MAX_MODULUS) {
+		printf("Warning: reducing high value to %d to avoid overflow\n", MAX_MODULUS);
+		h = MAX_MODULUS;
+	}
+	/* Lean towards higher values, because we want to reduce number of collisions
+	   in hash function using the largest possible modulus */
+	for (p = h; p > l; p--) {
+		if (miller_rabin(p, MILLER_RABIN_ATTEMPTS))
+			return p;
+	}
 	return 0;
 }
 
@@ -84,7 +150,8 @@ int witness(unsigned long a, unsigned long n)
 
 int main(int argc, char *argv[])
 {
-	printf("%lu\n", modexp(10, 3, 10));
+	srand(time(NULL));
+	unsigned long i;
+	printf("%lu\n", find_prime(MAX_MODULUS - 1000, MAX_MODULUS));
 	return 0;
-	       
 }

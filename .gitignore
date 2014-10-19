@@ -1,4 +1,5 @@
 *~
+*.o
 /c/bst/*
 !.gitignore
 !/c/bst/*.c
