@@ -5,12 +5,10 @@
 
 #include "search.h"
 
-#define LINE_SIZE (1 << 10)
-
 
 int main(int argc, char *argv[])
 {
-	char line[LINE_SIZE];
+	char line[BUF_LEN];
 	FILE *fp;
 	printf("%d\n", argc);
 	if (argc != 3) {
@@ -27,7 +25,7 @@ int main(int argc, char *argv[])
 	readline_status.done = 0;
 
 	do {
-		readline(line, LINE_SIZE, fp, &readline_status);
+		readline(line, BUF_LEN, fp, &readline_status);
 		printf("%s\n", line);
 	} while (!readline_status.done);
 

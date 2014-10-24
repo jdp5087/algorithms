@@ -5,19 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define WORD_WIDTH 32
-#define MAX_MODULUS (1 << ((WORD_WIDTH)/2))
-
-/* value of s in miller rabin, will
-   yield a probability of (1/(2**30))
-   that miller_rabin falsely reports
-   a non-prime to be prime */
-#define MILLER_RABIN_ATTEMPTS 30 
-
-struct t_and_u {
-	unsigned long t;
-	unsigned long u;
-};
+#include "prime.h"
 
 
 int bitwise_length(unsigned long n)
@@ -123,6 +111,8 @@ int miller_rabin(unsigned long n, int s)
   if high > MAX_MODULUS, We reduce high to MAX_MODULUS and continue.
    will return a prime where l <= p <= h, or NULL if no prime found
  */
+
+/* CHANGE THIS! MAKE IT INSTEAD USE (RANDOM_NUMBER % (HIGH-LOW)) + LOW, THEN PRIME TEST */
 unsigned long find_prime(unsigned long l, unsigned long h)
 {
 	
@@ -148,10 +138,11 @@ unsigned long find_prime(unsigned long l, unsigned long h)
 
 
 
-int main(int argc, char *argv[])
-{
-	srand(time(NULL));
-	unsigned long i;
-	printf("%lu\n", find_prime(MAX_MODULUS - 1000, MAX_MODULUS));
-	return 0;
-}
+
+/* int main(int argc, char *argv[]) */
+/* { */
+/* 	srand(time(NULL)); */
+/* 	unsigned long i; */
+/* 	printf("%lu\n", find_prime(MAX_MODULUS - 1000, MAX_MODULUS)); */
+/* 	return 0; */
+/* } */
