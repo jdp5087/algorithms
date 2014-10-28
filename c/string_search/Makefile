@@ -1,17 +1,17 @@
-search.o: search.c search.h
-	gcc -c search.c -o search.o
+FORCE:
 
-main.o: main.c search.c search.h
-	gcc -c main.c -o main.o
+search.o: search.c search.h FORCE
+	gcc $(FLAGS) -c search.c -o search.o
 
-jrep: main.o search.o
-	gcc search.o main.o -o jrep
 
-dsearch.o: search.c search.h
-	gcc -g -c search.c -o dsearch.o
+../prime/prime.o: ../prime/prime.c ../prime/prime.h FORCE
+	gcc $(FLAGS) -c ../prime/prime.c -o ../prime/prime.o
 
-dmain.o: main.c search.c search.h
-	gcc -g -c main.c -o dmain.o
+karp_rabin.o: ../prime/prime.h search.h karp_rabin.c karp_rabin.h FORCE
+	gcc $(FLAGS) -c karp_rabin.c -o karp_rabin.o
 
-dbg: dmain.o dsearch.o
-	gcc -g dsearch.o dmain.o -o dbg
+main.o: main.c search.h ../prime/prime.h karp_rabin.h FORCE
+	gcc $(FLAGS) -c main.c -o main.o
+
+jrep: search.o ../prime/prime.o karp_rabin.o main.o FORCE
+	gcc $(FLAGS) ../prime/prime.o search.o karp_rabin.o main.o -o jrep

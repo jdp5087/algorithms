@@ -2,6 +2,16 @@
 #include <stdio.h>
 #include "search.h"
 
+char *colors[] = {
+	ANSI_COLOR_RESET,
+	ANSI_COLOR_RED,
+	ANSI_COLOR_BLUE,
+	ANSI_COLOR_MAGENTA,
+	ANSI_COLOR_CYAN,
+	ANSI_COLOR_GREEN,
+	ANSI_COLOR_YELLOW,
+};
+
 /*
   to print a string with all valid offsets highlighted in different colors:
 
@@ -42,17 +52,6 @@
 
 
 char buf[BUF_LEN];
-
-struct print_stack {
-	struct entry **head;
-	struct entry *arr[BUF_LEN];
-	struct entry **stop;
-};
-
-struct entry {
-	struct entry **stack_pointer;
-	int value;
-};
 
 inline void init_print_stack(struct print_stack *stack)
 {
@@ -163,38 +162,38 @@ void print_colored_line(char *line, int lineno, struct entry *entries, struct pr
 	putchar('\n');
 }
 
-int main()
-{
-	int i;
-	char line[BUF_LEN];
-	char c = 'A';
-	for (i = 0; i < 26; i++) {
-		line[i] = c;
-		c++;
-	}
-	line[i] = '\0';
+/* int main() */
+/* { */
+/* 	int i; */
+/* 	char line[BUF_LEN]; */
+/* 	char c = 'A'; */
+/* 	for (i = 0; i < 26; i++) { */
+/* 		line[i] = c; */
+/* 		c++; */
+/* 	} */
+/* 	line[i] = '\0'; */
 	
-	struct print_stack stack;
-	struct entry entries[BUF_LEN];
+/* 	struct print_stack stack; */
+/* 	struct entry entries[BUF_LEN]; */
 
-	init_print_stack(&stack);
+/* 	init_print_stack(&stack); */
 
-	add_entry(2, 1, entries, &stack);
-	add_entry(4, -1, entries, &stack);
+/* 	add_entry(2, 1, entries, &stack); */
+/* 	add_entry(4, -1, entries, &stack); */
 
-	add_entry(10, 1, entries, &stack);
-	add_entry(15, -1, entries, &stack);
+/* 	add_entry(10, 1, entries, &stack); */
+/* 	add_entry(15, -1, entries, &stack); */
 
-	add_entry(13, 1, entries, &stack);
-	add_entry(18, -1, entries, &stack);
+/* 	add_entry(13, 1, entries, &stack); */
+/* 	add_entry(18, -1, entries, &stack); */
 
-	print_colored_line(line, 0, entries, &stack);
+/* 	print_colored_line(line, 0, entries, &stack); */
 
 
-	for (i = 0; i < 26; i++) {
-		printf("%d\n", entries[i].value);
-	}
+/* 	for (i = 0; i < 26; i++) { */
+/* 		printf("%d\n", entries[i].value); */
+/* 	} */
 
-	return 0;
+/* 	return 0; */
 	
-}
+/* } */

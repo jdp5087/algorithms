@@ -75,12 +75,10 @@ int witness(unsigned long a, unsigned long n)
 		xprev = xcur;
 		xcur = modexp(xprev, 2, n);
 		if ((xcur == 1) && (xprev != 1) && (xprev != (n - 1))) {
-			printf("nontrivial square root of 1 mod n\n");
 			return 1;
 		}
 	}
 	if (xcur != 1) {
-		printf("a**(n-1) is not congruent to 1 mod n\n");
 		return 1;
 	}
 	return 0;
