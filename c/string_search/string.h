@@ -35,6 +35,15 @@ struct read_status {
 	int file_len;
 };
 
+unsigned long stringlength(char *s);
+int strings_equal(
+	char *first,
+	unsigned long first_offset,
+	char *second,
+	unsigned long second_offset,
+	unsigned long length
+	);
+
 
 inline void init_print_stack(struct print_stack *stack);
 inline int empty_stack(struct print_stack *stack);

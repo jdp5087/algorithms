@@ -1,0 +1,106 @@
+HASH TABLE WITH CHAINING
+     (skipping open addressing because the issues with deletion are icky
+     	       this necessitates a "dirty" flag
+	       also can really slow things down after a bunch of deletes because
+	       deletes really only relinquish spot after an insertion that happens to cross
+	       the freed slot, or on table resize.
+	       
+     	       and since load factor should be at most around 0.5, the memory savings
+	       might not be that much better)
+
+DO AN AMORTIZED ANALYSIS WHERE WE CAN'T ASSUME CONSTANT TIME MEMORY ALLOCATIONS
+   for instance if we have to either insert an empty linked list in each slot
+   or set a "NULL" flag on every slot, then the time is linear
+   then cost of resize is actually n + n/2 instead of just n/2 elementary inserts
+
+things needed:
+       linked lists -- check to make sure that this has all structs and needed functions
+       	      	       modify to doubly linked if needed
+		       
+       hash function -- figure out what parameters will be needed. this can be a seperate module
+       	    m would be one
+	    may require a random prime generator
+       hash table
+       	    params
+		getkey -- objects need to either have a getkey function -- i like this idea
+		       	  	       	  bc it keeps all of the linear time string garbage outside
+					  of this data structure implementation
+
+		       	  we only hash one type and take a getkey on table init
+		hash function generator(default is to choose a random Universal hash function generator)
+		load factor thresholds -- choose good defaults (see MIT OCW lecture with Erik Demaine)
+	things it should hash:
+	       integers (perhaps unsigned long on 32-bit sys)
+	       strings? this is questionable
+	      		have to know string length and randomly choose constant chars to avoid theta(n)
+			check implementation of strlen
+
+table attributes
+      n -- number of entries
+      m -- table slots
+      load -- n/m
+      table -- array of size m * (size of linked list pointer) <-- this will change as we resize
+      	    so should this be a **?
+      hash function -- implies that this will be a pointer to a hash function, returns unsigned long
+      	   	       this will depend on m
+      hash function generator - taken as a param
+      
+functions that act on table
+
+insert - resize when exceeds a set load factor, will use table doubling
+       	 decide on a threshold? maybe
+	 hash key, insert at front, but doubly linked lists will be good
+
+
+search -- hash key, iterate linked list
+
+delete - also must resize
+       hash key, iterate linked list
+      
+
+gravy:
+	make linked lists embedded
+	maybe an optional starting size
+	also could take a list of key, object pairs to initialize table
+	could have an extend function
+	hash immutable objects? -- No, this would require basically implementing a type/class system
+
+abstract functionality needed from linked lists
+
+on initialization
+
+list_head_init()
+	get a list head
+is_list_head()
+	indicates whether given struct linked_list * is list head
+	could have key and data point at each other for this (maybe)
+
+on resize:
+
+list_head_init()
+list_remove(element)
+	take the element out of a list but without deallocation
+list_remove_and_insert(current, new)
+	take the element out of one slot and insert it into another
+	this will be a combination of list_remove and list_insert
+
+on a successful insert:
+
+list_init()
+	get a new list link
+list_insert(location, key, data)
+	insert after location with appropriate data
+
+on a successful delete:
+
+list_delete(link)
+	remove link from chain
+	deallocate key and data
+
+when done with table:
+
+list_dealloc(list_head)
+	deallocate entire list, key, and data
+
+useful macro
+       iterate each element in a while loop from head->next to last

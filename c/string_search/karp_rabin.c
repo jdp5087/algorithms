@@ -1,9 +1,8 @@
 
 #include <stdio.h>
-#include <string.h>
 
 #include "../prime/prime.h"
-#include "search.h"
+#include "string.h"
 #include "karp_rabin.h"
 
 /*
@@ -14,44 +13,6 @@ struct rolling_hash {
 	unsigned long n;
 	unsigned long h;
 };
-
-/*
-  This is necessary because strlen in string.h requires const char *,
-  which our strings might not be.
- */
-unsigned long stringlength(char *s)
-{
-	unsigned long n = 0;
-	char *sp = s;
-
-	while (*sp != '\0') {
-		n++;
-		sp++;
-	}
-	return n;
-}
-
-int strings_equal(
-	char *first,
-	unsigned long first_offset,
-	char *second,
-	unsigned long second_offset,
-	unsigned long length
-	)
-{
-	unsigned long i;
-	char *s1, *s2;
-
-	s1 = first + first_offset;
-	s2 = second + second_offset;
-
-	for (i = 0; i < length; i++) {
-		if (*(s1++) != *(s2++))
-			return 0;
-	}
-	return 1;
-	
-}
 
 void init_rolling_hash(struct rolling_hash *rh, char *s, unsigned long stringlen)
 {

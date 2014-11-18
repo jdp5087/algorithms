@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "search.h"
+#include "string.h"
 
 char *colors[] = {
 	ANSI_COLOR_RESET,
@@ -48,10 +48,45 @@ char *colors[] = {
        
  */
 
-
-
-
 char buf[BUF_LEN];
+
+/*
+  This is necessary because strlen in string.h requires const char *,
+  which our strings might not be.
+ */
+unsigned long stringlength(char *s)
+{
+	unsigned long n = 0;
+	char *sp = s;
+
+	while (*sp != '\0') {
+		n++;
+		sp++;
+	}
+	return n;
+}
+
+int strings_equal(
+	char *first,
+	unsigned long first_offset,
+	char *second,
+	unsigned long second_offset,
+	unsigned long length
+	)
+{
+	unsigned long i;
+	char *s1, *s2;
+
+	s1 = first + first_offset;
+	s2 = second + second_offset;
+
+	for (i = 0; i < length; i++) {
+		if (*(s1++) != *(s2++))
+			return 0;
+	}
+	return 1;
+	
+}
 
 inline void init_print_stack(struct print_stack *stack)
 {
@@ -150,8 +185,11 @@ void print_colored_line(char *line, int lineno, struct entry *entries, struct pr
 	printf("line %d: ", lineno);
 	for (i = 0; i < BUF_LEN; i++) {
 		c = line[i];
-		if (c == '\0')
+		if (c == '\0') {
+			if (state)
+				printf(colors[0]);
 			break;
+		}
 		if (is_valid(i, entries, s)) {
 			state += entries[i].value;
 			if ((!state) || (entries[i].value == 1))

@@ -1,6 +1,9 @@
 struct linked_list {
 	struct linked_list *prev;
 	struct linked_list *next;
+#ifdef HASH_TABLE_LINKED_LIST
+	void *key;
+#endif
 	void *data;
 };
 

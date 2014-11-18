@@ -4,8 +4,8 @@
 #include <stdio.h>
 
 #include "../prime/prime.h"
-#include "search.h"
-#include "karp_rabin.h"
+#include "string.h"
+#include "kmp.h"
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	karp_rabin(fp, argv[2]);
+	kmp(fp, argv[2]);
 
 	if (fclose(fp) == EOF) {
 		printf("Error: %s would not close properly. Info: %s", argv[1], strerror(errno));
