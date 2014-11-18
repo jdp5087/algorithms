@@ -2,39 +2,52 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define WORD_SIZE 32
-#define WORD_MASK 0xFFFFFFFF
+#include "multiplication.h"
 
-struct hash_variables {
-	unsigned long a;
-	unsigned long l;
-};
+static struct hash_descriptor desc;
 
-static struct hash_variables vars;
+unsigned long random_unsigned_long(void)
+{
+	return ((unsigned long)rand() << 16) ^ ((unsigned long)rand() << 3) ^ ((unsigned long)rand() >> 10);
 
-void init_hash_variables(void)
+	
+}
+
+unsigned long find_exp_of_power_of_two(unsigned long m)
+{
+	unsigned long i = 0;
+	unsigned long temp = m;
+	while ((temp >>= 1)) {
+		i++;
+	}
+	return i;
+}
+
+/* modulus must be a power of two!, otherwise the modulus will be reduced to floor(lg(modulus)) */
+void init_hash_variables(unsigned long modulus)
 {
 	srand(time(NULL));
-	vars->l = 0;
-	/* This will choose vars->a to be a random odd number between [0x1, 0xFFFFFFFF]  */
-	vars->a = (rand() % WORD_MASK) | 1; // This will be truncated to a word anyway...
+	desc.l = find_exp_of_power_of_two(modulus);
+	/* This will choose desc.a to be a random odd number between [0x1, 0xFFFFFFFF]  */
+	desc.a = random_unsigned_long() | 1;
 }
 
 /* multiplier must be a power of two! */
 void rebuild_increase(int multiplier)
 {
-	if ((vars->l + multiplier) >= WORD_SIZE)
+	unsigned long m = find_exp_of_power_of_two(multiplier);
+	if ((desc.l + m) >= WORD_SIZE) {
 		printf("Error: increasing hash function modulus to be greater than %d will cause overflow.",
 		       WORD_SIZE);
 		exit(1);
 	}
-	vars->l += multiplier;
+	desc.l += m;
 }
 
 /* multiplier must be a power of two! */
 void rebuild_decrease(int multiplier)
 {
-	if (vars->l < multiplier) {
+	if (desc.l < multiplier) {
 		printf("Error: decreasing hash function modulus to be less than 0 does not even make sense,"
 		       " just saying.");
 		exit(0);
@@ -51,6 +64,11 @@ unsigned long hash(void *key)
 {
 	unsigned long k = *(unsigned long *)k;
 
-	return (vars->a*k) >> (WORD_SIZE - vars->l);
+	printf("desc.l: %lu\n", desc.l);
+
+	if (!desc.l)
+		return 0;
+
+	return (desc.a*k) >> (WORD_SIZE - desc.l);
 }
 
