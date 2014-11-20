@@ -3,12 +3,14 @@
 #include <stdlib.h>
 
 #include "multiplication.h"
+#include "../include/sysvars.h"
+
 
 static struct hash_descriptor desc;
 
 unsigned long random_unsigned_long(void)
 {
-	return ((unsigned long)rand() << 16) ^ ((unsigned long)rand() << 3) ^ ((unsigned long)rand() >> 10);
+	return ((unsigned long)rand() << 16) | ((unsigned long)rand());
 
 	
 }

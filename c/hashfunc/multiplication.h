@@ -1,6 +1,3 @@
-#define WORD_SIZE 32
-#define WORD_MASK 0xFFFFFFFF
-
 struct hash_descriptor {
 	unsigned long a;
 	unsigned long l;
