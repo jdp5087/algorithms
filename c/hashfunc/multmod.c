@@ -133,13 +133,13 @@ void rebuild_increase(unsigned long multiplier)
 
 void rebuild_decrease(unsigned long multiplier)
 {
-	mzp_t tmp;
+	mpz_t tmp;
 
 	mpz_init(tmp);
 
 	mpz_fdiv_q_ui(tmp, desc.m, multiplier);
 
-	if (mpz_cmp_ui(tmp, 1) <= 0) {
+	if (mpz_cmp_ui(tmp, 1) < 0) {
 		printf("Error while decreasing hash function modulus: modulus must not be"
 		       " reduced to less than 1. That would sort-of defeat the purpose"
 		       " of a hash function.\n");
@@ -149,5 +149,19 @@ void rebuild_decrease(unsigned long multiplier)
 	mpz_set(desc.m, tmp);
 }
 	
+unsigned long hash(void *key)
+{
+	mpz_t tmp;
 
+	mpz_init(tmp);
+
+	unsigned long k = *(unsigned long *)key;
+
+	mpz_mul_ui(tmp, desc.a, k);
+	mpz_add(tmp, tmp, desc.b);
+	mpz_mod(tmp, tmp, desc.p);
+	mpz_mod(tmp, tmp, desc.m);
+
+	return mpz_get_ui(tmp);
+}
 

@@ -9,4 +9,8 @@ struct hash_descriptor {
 };
 
 void init_hash_func_descriptor(unsigned long modulus);
+void rebuild_increase(unsigned long multiplier);
+void rebuild_decrease(unsigned long multiplier);
+unsigned long hash(void *key);
+
 

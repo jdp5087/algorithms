@@ -19,7 +19,7 @@ test_multmod.o: test_multmod.c multmod.h multmod.c
 
 .PHONY: clean
 clean:
-	rm test_multmod test_mult $(objects_multmod) $(objects_mult)
+	rm -f test_multmod test_mult $(objects_multmod) $(objects_mult)
 
 
 
