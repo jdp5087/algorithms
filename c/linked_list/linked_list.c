@@ -3,6 +3,13 @@
 
 #include "linked_list.h"
 
+void static_list_init(struct linked_list *x)
+{
+	x->next = x;
+	x->prev = x;
+	
+}
+
 struct linked_list * list_init(void)
 {
 	struct linked_list *x;

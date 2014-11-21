@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 	int i;
 	unsigned long key, h;
 	
-	init_hash_variables(0);
+	init_hash_descriptor(0);
 
 	for (i = 0; i < 31; i++) {
 		key = random_unsigned_long();
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
 		printf("i: %d, key: %lu, hash: %lu\n", i, key, h);
 
-		rebuild_increase(2);
+		resize_hash_modulus(1 << i);
 		
 	}
 

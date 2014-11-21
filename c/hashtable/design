@@ -25,9 +25,10 @@ things needed:
 		getkey -- objects need to either have a getkey function -- i like this idea
 		       	  	       	  bc it keeps all of the linear time string garbage outside
 					  of this data structure implementation
-
+			-- this wont work with an associative array implementation
 		       	  we only hash one type and take a getkey on table init
-		hash function generator(default is to choose a random Universal hash function generator)
+			  hash function generator(default is to choose a random Universal hash function generator)
+			       -- decided to do this as a struct that holds the functions
 		load factor thresholds -- choose good defaults (see MIT OCW lecture with Erik Demaine)
 	things it should hash:
 	       integers (perhaps unsigned long on 32-bit sys)
@@ -36,14 +37,12 @@ things needed:
 			check implementation of strlen
 
 table attributes
-      n -- number of entries
-      m -- table slots
-      load -- n/m
-      table -- array of size m * (size of linked list pointer) <-- this will change as we resize
+      unsigned long n -- number of entries
+      unsigned long m -- table slots
+      float? load -- n/m
+      struct linked_list * table -- array of size m * (size of linked list pointer) <-- this will change as we resize
       	    so should this be a **?
-      hash function -- implies that this will be a pointer to a hash function, returns unsigned long
-      	   	       this will depend on m
-      hash function generator - taken as a param
+       struct hash_functions
       
 functions that act on table
 

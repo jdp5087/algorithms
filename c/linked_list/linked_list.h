@@ -7,6 +7,7 @@ struct linked_list {
 	void *data;
 };
 
+void static_list_init(struct linked_list *x);
 struct linked_list * list_init(void);
 int is_empty(struct linked_list *x);
 void list_insert(struct linked_list *x, void *data);
