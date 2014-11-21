@@ -20,6 +20,8 @@ int main(int argc, char *argv[])
 	for (i = 0; i < 32; i++) {
 		k = random_ui();
 		printf("hash: %lu\n", hash((void *)&k));
+		printf("hash: %lu\n", hash((void *)&k));
+
 	}
 
 }
