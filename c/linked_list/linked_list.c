@@ -74,12 +74,23 @@ void list_delete(struct linked_list *x)
 	
 }
 
+
+/* This function makes the assumption that every list member
+   other than the head is dynamically allocated, while the
+   head itself is static/will be freed elsewhere
+   (probably part of an array of dynamically allocated structs)
+
+ */
+void static_list_dealloc(struct linked_list *x)
+{
+	while(!is_empty(x))
+		list_delete(x);
+}
+
 void list_dealloc(struct linked_list *x)
 {
-	void *data;
-	while(!is_empty(x)) {
+	while(!is_empty(x))
 		list_delete(x);
-	}
 	free(x);
 }
 

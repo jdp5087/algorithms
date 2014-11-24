@@ -1,7 +1,8 @@
 #include "../linked_list/linked_list.h"
 #include <limits.h>
 
-#define WOULD_OVERFLOW(x, multiplicand) ((x) > ((ULONG_MAX)/multiplicand))
+#define WILL_OVERFLOW(x, multiplicand) ((x) > ((ULONG_MAX)/multiplicand))
+#define LOAD_FACTOR(table) ((table->n)/(table->m))
 #define INCREASE_FACTOR 2
 #define DECREASE_FACTOR 4
 

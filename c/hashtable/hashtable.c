@@ -27,9 +27,15 @@ void init_array(struct hashtable *table)
 		static_list_init(OFFSET_FROM_POINTER(table->arr, i));
 }
 
+void dealloc_hashtable(struct hashtable *table)
+{
+	struct linked_list *tmp;
+
+	
+}
 
 void rehash_old_array(struct hashtable *table, struct linked_list *old_arr,
-		       unsigned long old_size);
+		       unsigned long old_size)
 {
 	unsigned long i;
 	struct linked_list *entry;
@@ -57,10 +63,10 @@ void resize_table(struct hashtable *table, unsigned long size)
 	table->funcs->resize(size);
 
 	old_arr = table->arr;
-	table->arr = (struct linked_list *)malloc(sizeof(struct linked list)*size);
+	table->arr = (struct linked_list *)malloc(sizeof(struct linked_list)*size);
 	init_array(table);
 
-	rehash_old_array(table, old arr, old_size);
+	rehash_old_array(table, old_arr, old_size);
 
 	free(old_arr);
 }

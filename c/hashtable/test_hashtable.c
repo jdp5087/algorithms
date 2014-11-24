@@ -13,6 +13,8 @@ int main(int argc, char *argv[])
 
 	init_hashtable(&table, &funcs, 1, 2);
 
+	dealloc_hashtable(&table);
+
 	
 
 }
