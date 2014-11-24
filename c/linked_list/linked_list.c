@@ -26,12 +26,20 @@ int is_empty(struct linked_list *x)
 	return 0;
 }
 
+
+/* MUST ADD KEY IN PARAMS AND ASSIGN AS WELL */
+#ifdef HASH_TABLE_LINKED_LIST
+void list_insert(struct linked_list *x, void *key, void *data)
+#else
 void list_insert(struct linked_list *x, void *data)
+#endif /* HASH_TABLE_LINKED_LIST */
 {
 	struct linked_list *new, *before;
 	new = (struct linked_list *)malloc(sizeof(struct linked_list));
 	new->data = data;
-
+#ifdef HASH_TABLE_LINKED_LIST
+	new->key = key;
+#endif /* HASH_TABLE_LINKED_LIST */
 	before = x->prev;
 
 	x->prev = new;
@@ -44,15 +52,24 @@ void list_delete(struct linked_list *x)
 {
 	struct linked_list *delete, *before;
 	void *data;
+#ifdef HASH_TABLE_LINKED_LIST
+	void *key;
+#endif /* HASH_TABLE_LINKED_LIST */
 
 	if (!is_empty(x)) {
 		delete = x->prev;
 		before = delete->prev;
 		data = x->prev->data;
+#ifdef HASH_TABLE_LINKED_LIST
+		key = x->prev->key;
+#endif /* HASH_TABLE_LINKED_LIST */
 		before->next = x;
 		x->prev = before;
 		free(delete);
 		free(data);
+#ifdef HASH_TABLE_LINKED_LIST
+		free(key);
+#endif /*HASH_TABLE_LINKED_LIST */
 	}
 	
 }
